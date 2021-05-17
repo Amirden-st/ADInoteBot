@@ -88,9 +88,10 @@ async def add_category(message: types.Message):
 
 @dp.message_handler(lambda m: m.text.startswith('/del_category'))
 async def del_category(message: types.message):
-    category_name = re.findall(r'/get_category\s+(\w+)$', message.text)[0]
-    response = db.del_category(category_name)
-    await message.reply(response)
+    # category_name = re.findall(r'/get_category\s+(\w+)$', message.text)[0]
+    # response = db.del_category(category_name)
+    # await message.reply(response)
+    pass
 
 
 @dp.message_handler()
@@ -100,14 +101,14 @@ async def write_notes(message: types.Message):
     await message.reply(response)
 
 
-def _parse_message(message_text: str, user_id):
-    pattern = r"([^-:]+)-?:?([^-:]+)?-?:?([^-:]+)?"
-    rows = list(filter(lambda string: string,
-                re.search(pattern, message_text).groups()))
-    note_dict = {'title': None, 'content': None,
-                 'user_category_id': 'non_category'}
-    db._get_users_categories_id
-    return db.create_note_dict(rows, user_id)
+# def _parse_message(message_text: str, user_id):
+#     pattern = r"([^-:]+)-?:?([^-:]+)?-?:?([^-:]+)?"
+#     rows = list(filter(lambda string: string,
+#                 re.search(pattern, message_text).groups()))
+#     note_dict = {'title': None, 'content': None,
+#                  'user_category_id': 'non_category'}
+#     db._get_users_categories_id
+#     return db.create_note_dict(rows, user_id)
 
 
 
