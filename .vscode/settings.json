@@ -1,0 +1,6 @@
+{
+    "AllAutocomplete.minWordLength": 1,
+    "python.pythonPath": "C:\\Users\\User\\projects\\ADINoteBot\\venv\\Scripts\\python.exe",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true
+}
