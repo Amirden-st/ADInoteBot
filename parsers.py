@@ -1,8 +1,8 @@
 
-from typing import Pattern
-from aiogram import types
 import re
+from typing import Pattern
 
+from aiogram import types
 from aiogram.types import Message
 
 

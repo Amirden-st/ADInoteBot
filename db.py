@@ -1,11 +1,11 @@
 import datetime
 import re
 import sqlite3
+import uuid
 from sqlite3.dbapi2 import IntegrityError
 
 from aiogram.types import user
 from attr.setters import convert
-from jinja2 import Template
 
 # root_dir = os.path.dirname(__file__)
 
@@ -22,20 +22,6 @@ con.row_factory = dict_factory
 cur = con.cursor()
 sql_f = open('create.sql').read()
 cur.executescript(sql_f)
-
-response_body = Template('''
---------------------------------
-{%+ if not note_dict['title'] -%}
-({{note_dict['id']}})
-{%+ else -%}
-{{note_dict['title']}} ({{note_dict['id']}})
-{%+ endif -%}
-{{note_dict['content']}}
-
-{% if show_date %}{{note_dict['created_at']}}{% endif %}    {% if note_dict['category_name'] %}{{'#'+note_dict['category_name']}}{% endif %}
-''')
-
-show_date = True
 
 
 def add_user(user_id, offset: dict):
@@ -78,52 +64,49 @@ def insert_note(note_dict: dict, user_id):
             The "{note_dict["category_name"]}" category does not exist.\nIf you want to add it, write: /add_category {note_dict["category_name"]}
             """
         user_time = _get_user_time(user_id)
+        note_id = uuid.uuid3(uuid.NAMESPACE_DNS, 'hello world')
         cur.execute(f"""
         --sql
-        insert into notes(title, content, created_at, user_category_id) 
+        insert into notes(id, title, content, created_at, user_category_id) 
         values(?, ?, ?, ?)
         ;
-        """, (note_dict['title'], note_dict['content'], user_time, user_category_id))
+        """, (note_id, note_dict['title'], note_dict['content'], user_time, user_category_id))
         con.commit()
         return 'The note was written down.'
     except sqlite3.IntegrityError:
         return f"The {note_dict['category_name']} category does not exist."
 
 
-def get_note(ids: tuple, user_id):
+def get_note(ids:tuple, user_id) -> list:
     notes = []
     for id in ids:
         cur.execute("""
         --sql
         SELECT notes.title as title, notes.content as content, users_categories.category_name as category_name, notes.created_at as created_at, notes.id as id
         FROM notes JOIN users_categories ON notes.user_category_id == users_categories.id
-        WHERE notes.id == ? AND users_categories.user_id = ?
+        WHERE notes.id == ? AND users_categories.user_id == ?
         ;
         """, (id, user_id))
-        notes.append(cur.fetchone())
-    if not notes:
-        return 'Notes with {} are not found'.format(', '.join(ids))
-    response = ''
-    for note in notes:
-        response = response_body.render(
-            note_dict=note, show_date=show_date) + response
-    return response
+        note = cur.fetchone()
+        if note:
+            notes.append(note)
+        else:
+            notes.append(id)
+    return notes
 
-
-def del_note(ids, user_id):
-    response = get_note(ids, user_id)
-
-    if not isinstance(response, str):
-        cur.executescript("""
+def del_note(id, user_id):
+    id_exist = []  
+    for i in id:
+        cur.execute(f"""
         --sql
-        DELETE FROM notes WHERE note_id == ?  
+        SELECT notes.id as id
+        FROM notes JOIN users_categories ON notes.user_category_id == users_categories.id
+        WHERE notes.id == ? AND users_categories.user_id =={user_id}
         ;
-        """, map(lambda note: note['id'], response))
-        con.commit()
-        return 'Notes are deleted'
-    else:
-        return response
-
+        """, (i, user_id))
+        note_id = cur.fetchone()
+        id_exist.append(bool(note_id))
+    return dict(zip(id, id_exist))
 
 def get_category(category_name):
     cur.execute("""

@@ -1,7 +1,2 @@
-class Human:
-    def __init__(self, name, surname, age):
-        self.name = name
-        self.surname = surname
-        self.age = age
-
-human = Human('Oleg', 'Chernobaev', 18)
+import uuid
+key = uuid.

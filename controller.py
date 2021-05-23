@@ -1,15 +1,15 @@
 import logging
-
-from aiogram.dispatcher.filters import state
-import db
 import re
-import parsers
 
 from aiogram import Bot, Dispatcher, executor, types
-from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import state
+from aiogram.dispatcher.filters.state import State, StatesGroup
 
+import db
+import parsers
+import template 
 
 
 class DataInput(StatesGroup):
@@ -26,20 +26,20 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 
 
 @dp.message_handler(commands=['start'])
-async def send_welcome(message:types.Message):
+async def send_welcome(message: types.Message):
     await message.reply("""
     Hello!\nI'm a bot for notes. To start working with the bot, specify your UTS offset. for example:\n__+3__\n__-3__
     """)
     await DataInput.state.set()
 
-    
 
 @dp.message_handler(state=DataInput.state)
-async def init(message:types.Message, state:FSMContext):
-    offset = re.search(r'(?P<hours>[-+]?\d{,2}):?(?P<minutes>\d{2})?', message.text).groupdict()
+async def init(message: types.Message, state: FSMContext):
+    offset = re.search(
+        r'(?P<hours>[-+]?\d{,2}):?(?P<minutes>\d{2})?', message.text).groupdict()
     if not offset['hours']:
         await message.reply("Invalid structure.Please try again.\nHint:__hours:minutes__")
-        return 
+        return
     db.init_user(message.chat.id, offset)
     await message.reply("""
     Now let's start to work!
@@ -51,7 +51,8 @@ async def init(message:types.Message, state:FSMContext):
 @dp.message_handler(lambda m: m.text.startswith('/get_note '))
 async def send_note(message: types.Message):
     ids = parsers.MessageParser(message).get_ids()
-    response = db.get_note(ids, message.chat.id)
+    note_dicts = db.get_note(ids, message.chat.id)
+    response = template.notes_template.render(note_dicts)
     await message.reply(response)
 
 
@@ -109,8 +110,6 @@ async def write_notes(message: types.Message):
 #                  'user_category_id': 'non_category'}
 #     db._get_users_categories_id
 #     return db.create_note_dict(rows, user_id)
-
-
 
 
 if __name__ == '__main__':
