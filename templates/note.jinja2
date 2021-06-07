@@ -1,0 +1,23 @@
+{% macro header(title, id) %}
+--------------------------------      
+{% if title is none %}
+( {{id}} )
+{% else %}
+{{title}} ( {{id}} )
+{% endif %}
+{% endmacro %}
+
+{% macro content(content, content_length) %}
+{% if content_length is defined %}
+{{ content[:content_length] + '...' if content | length > content_length else content[:content_length] }}
+{% else %}
+{{ content }}
+{% endif %}
+
+{% endmacro %}
+
+{% macro footer(show_date, created_at, category_name) %}
+{% if show_date %}{{created_at}}    {% if category_name is defined %}#{{category_name}}{% endif %}
+{% else %}{{category_name}} 
+{% endif %}
+{% endmacro %}

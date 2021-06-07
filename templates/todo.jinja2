@@ -1,0 +1,16 @@
+{% macro header(id) %}
+--------------------------------      
+        ( {{id}} )
+{% endmacro %}
+
+{% macro content(content, content_length) %}
+{% if content_length is defined %}
+{{ content[:content_length] + '...' if content | length > content_length else content[:content_length] }}
+{% else %}
+{{ content }}
+{% endif %}
+
+{% endmacro %}
+
+{% macro footer(show_date, created_at, deadline, completed, user_time) %}
+{% if show_date %}{{created_at}} - {% endif %}{{ deadline }}  {% if deadline <= user_time and not completed  %}❌{% elif completed %}✅{% else %}🔵{% endif %}{% endmacro %}

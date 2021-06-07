@@ -1,0 +1,10 @@
+{% if notes %}
+{% from note_template import header, content, footer %}
+Notes of "{{ category_name }}":
+{% for note in notes %}
+{{ header(note.title, note.id) }}
+{{ content(note.content) }}
+{{ footer(show_date, note.created_at) }}
+{% endfor %}
+{% else %}Notes are not found.
+{% endif %}

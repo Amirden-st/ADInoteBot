@@ -1,0 +1,15 @@
+{% from "todo.jinja2" import header, content, footer %}
+{% for todo in todos %}
+{% if todo is not string %}
+{{ header(todo.id) }}
+{{ content(todo.content, content_length) }}
+{{ footer(show_date, todo.created_at, todo.deadline, todo.completed, user_time) }}
+{% endif %}
+{% endfor %}
+{% set not_found = todos | selectattr("content", "undefined") | list %}
+{% if not_found %}
+
+||||||||||||||||||||||||||||||||
+Not found todos:
+{% for id in not_found %}{{ id }}{% if not loop.last %}, {% endif %}{% endfor %}
+{% endif %}

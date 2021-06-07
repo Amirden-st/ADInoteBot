@@ -1,0 +1,9 @@
+{% if category_name is defined %}"{{ category_name }}" was deleted.{% endif %}
+
+{% if found|length != 0 %}
+{{ type.lower().capitalize() }} are {{ action.lower() }}: {{ found|length }}
+{% endif %}
+{% if already_done %}Already {{ action.lower() }} {{ type.lower() }}: {% for id in already_done %}_{{ id }}_{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}
+{% if not_found %}
+Not found {{ type.lower() }}: {% for item in not_found %}_{{ item }}_{% if not loop.last %}, {% endif %}{% endfor %}
+{% endif %}
