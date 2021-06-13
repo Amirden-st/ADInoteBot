@@ -14,7 +14,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import user
 from aiogram.types.base import T
 from aiogram.types.message import ParseMode
-from aiogram.utils.executor import start_webhook
+from aiogram.utils.executor import start_polling, start_webhook
 from attr import resolve_types
 
 import config
@@ -32,12 +32,12 @@ class DataInput(StatesGroup):
 API_TOKEN = '1791066149:AAE3Ca3BRZZrQqVhUv2wckZ9HugTDVCCPuA'
 
 # webhook settings
-WEBHOOK_HOST = 'https://frozen-wildwood-39904.herokuapp.com/'
-WEBHOOK_URL = f"{WEBHOOK_HOST}//{API_TOKEN}"
+WEBHOOK_HOST = '127.0.0.1'
+WEBHOOK_URL = 'https://frozen-wildwood-39904.herokuapp.com'
 
 # webserver settings
 WEBAPP_HOST = 'localhost'  # or ip
-WEBAPP_PORT = int(os.environ.get('PORT', 5000))
+WEBAPP_PORT = 5000
 
 
 # Configure logging
@@ -224,35 +224,35 @@ async def write_notes(message: types.Message):
 #         await asyncio.sleep(wait_for)
 
 
-async def on_startup(dp):
-    await bot.set_webhook(WEBHOOK_URL)
-    # insert code here to run it after start
+# async def on_startup(dp):
+#     await bot.set_webhook(WEBHOOK_URL)
+#     # insert code here to run it after start
+#     @dp.message_handler()
+#     async def write_notes(message: types.Message):
+#         note_dict = parsers.MessageParser(message).get_note_dict()
+#         try:
+#             note_id = db.insert_note(note_dict, message.chat.id)
+#         except CategoryError:
+#             await message.reply(f'"{note_dict["category_name"]}" category does not exist.')
+#         else:
+#             await message.reply(f'The note was writen down. Its id: _{note_id}_',  parse_mode="Markdown")
 
 
-async def on_shutdown(dp):
-    logging.warning('Shutting down..')
+# async def on_shutdown(dp):
+#     logging.warning('Shutting down..')
+    
+#     # insert code here to run it before shutdown
 
-    # insert code here to run it before shutdown
+#     # Remove webhook (not acceptable in some cases)
+#     await bot.delete_webhook()
 
-    # Remove webhook (not acceptable in some cases)
-    await bot.delete_webhook()
+#     # Close DB connection (if used)
+#     await dp.storage.close()
+#     await dp.storage.wait_closed()
 
-    # Close DB connection (if used)
-    await dp.storage.close()
-    await dp.storage.wait_closed()
-
-    logging.warning('Bye!')
+#     logging.warning('Bye!')
 
 if __name__ == '__main__':
     # loop = asyncio.get_event_loop()
     # loop.create_task(sheduled(10))
-
-    start_webhook(
-        dispatcher=dp,
-        webhook_path='//'+API_TOKEN,
-        on_startup=on_startup,
-        on_shutdown=on_shutdown,
-        skip_updates=True,
-        host=WEBAPP_HOST,
-        port=WEBAPP_PORT,
-    )
+    start_polling(dp)
